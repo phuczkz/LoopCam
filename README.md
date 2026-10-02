@@ -40,13 +40,11 @@ npm install
 
 ### 2. Cấu hình Supabase
 
-Tạo file `.env` từ `.env.example`:
+Tạo file `.env`:
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
-
-> **Yêu cầu Supabase**: Cần tạo bucket Storage `photos` (public/authenticated) và các bảng `profiles`, `posts`, `post_recipients`, `friendships`, `messages`.
 
 ### 3. Chạy dev server
 
@@ -67,6 +65,3 @@ npm run dev
 
 ---
 
-## 📄 License
-
-MIT
