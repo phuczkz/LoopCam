@@ -134,16 +134,17 @@ export function FriendsProvider({ children }) {
     await Promise.all([fetchFriends(), fetchPendingReceived(), fetchPendingSent()])
   }, [fetchFriends, fetchPendingReceived, fetchPendingSent])
 
-  // Search users by username or full name
+  // Search users by exact username or full name (yêu cầu đúng tên/username, không phân biệt hoa thường)
   const searchUsers = useCallback(
     async (query) => {
-      if (!query.trim() || !user) return []
-      const clean = query.trim().replace(/^@/, '')
+      if (!query || !user) return []
+      const clean = query.trim().replace(/^@+/, '').replace(/["'%_(),]/g, '').trim()
+      if (!clean) return []
 
       const { data, error } = await supabase
         .from('profiles')
         .select('id, username, full_name, avatar_url')
-        .or(`username.ilike.%${clean}%,full_name.ilike.%${clean}%`)
+        .or(`username.ilike."${clean}",full_name.ilike."${clean}"`)
         .neq('id', user.id)
         .limit(20)
 

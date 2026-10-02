@@ -28,8 +28,8 @@ export function MessagesPage() {
   const [friendSearch, setFriendSearch] = useState('')
 
   const filteredFriends = friends.filter((f) => {
-    if (!friendSearch.trim()) return true
-    const q = friendSearch.toLowerCase()
+    const q = friendSearch.trim().toLowerCase().replace(/^@+/, '')
+    if (!q) return true
     const name = f.profile?.full_name?.toLowerCase() || ''
     const user = f.profile?.username?.toLowerCase() || ''
     return name.includes(q) || user.includes(q)

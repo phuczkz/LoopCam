@@ -44,15 +44,21 @@ export function FriendsPage() {
   const [searchLoading, setSearchLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState(null) // friendshipId or userId
 
-  // Debounced search
+  // Debounced search (hỗ trợ nhập thẳng tên/username, không cần @)
   useEffect(() => {
-    const trimmed = searchQuery.trim()
-    if (activeTab !== 'search' || !trimmed) return
+    const clean = searchQuery.trim().replace(/^@+/, '').trim()
+    if (activeTab !== 'search') return
+
+    if (!clean) {
+      setSearchResults([])
+      setSearchLoading(false)
+      return
+    }
 
     const timer = setTimeout(async () => {
       setSearchLoading(true)
       try {
-        const results = await searchUsers(trimmed)
+        const results = await searchUsers(clean)
         setSearchResults(results)
       } finally {
         setSearchLoading(false)
@@ -336,12 +342,12 @@ export function FriendsPage() {
               <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dark-400" />
               <input
                 type="text"
-                placeholder="Tìm theo @username hoặc tên..."
+                placeholder="Nhập chính xác tên hoặc username..."
                 value={searchQuery}
                 onChange={(e) => {
                   const val = e.target.value
                   setSearchQuery(val)
-                  if (!val.trim()) {
+                  if (!val.trim().replace(/^@+/, '').trim()) {
                     setSearchResults([])
                   }
                 }}
@@ -355,9 +361,19 @@ export function FriendsPage() {
               <div className="flex justify-center py-10">
                 <Spinner size={28} />
               </div>
-            ) : searchQuery.trim() && searchResults.length === 0 ? (
+            ) : !searchQuery.trim().replace(/^@+/, '').trim() ? (
+              <div className="text-center py-12 px-4">
+                <div className="w-12 h-12 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center mx-auto mb-3 text-dark-400">
+                  <Search size={20} />
+                </div>
+                <p className="text-white text-sm font-medium">Tìm kiếm người dùng</p>
+                <p className="text-dark-400 text-xs mt-1 max-w-[260px] mx-auto">
+                  Nhập chính xác tên hoặc username để tìm bạn bè (ví dụ: Khanh)
+                </p>
+              </div>
+            ) : searchResults.length === 0 ? (
               <p className="text-dark-400 text-sm text-center py-10">
-                Không tìm thấy người dùng &quot;{searchQuery}&quot;
+                Không tìm thấy người dùng &quot;{searchQuery.trim().replace(/^@+/, '')}&quot;
               </p>
             ) : (
               <div className="space-y-2">
