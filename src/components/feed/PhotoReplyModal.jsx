@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { X, ArrowUp } from 'lucide-react'
 import { Avatar } from '../ui/Avatar'
-import toast from 'react-hot-toast'
 
-const QUICK_EMOJIS = ['🍲', '🥄', '🫶', '❤️', '😂', '🔥', '🥹']
+const QUICK_EMOJIS = ['❤️', '🔥', '😂', '🥹', '🫶', '👍']
 
 export function PhotoReplyModal({
   isOpen,
@@ -71,7 +70,6 @@ export function PhotoReplyModal({
       onClose()
     } catch (err) {
       console.error('PhotoReplyModal submit error:', err)
-      toast.error('Không thể gửi bình luận. Thử lại sau!')
     } finally {
       setSending(false)
     }
@@ -164,7 +162,7 @@ export function PhotoReplyModal({
                     onClick={() => setSelectedFriendId(fId)}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-amber-400 text-black border-amber-400 font-bold shadow-md'
+                        ? 'bg-[#CCFF00] text-black border-[#CCFF00] font-extrabold shadow-md'
                         : 'bg-white/10 text-white/80 border-white/15 hover:bg-white/15'
                     }`}
                   >

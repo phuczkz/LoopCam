@@ -424,7 +424,7 @@ export function useChat(friendId, initialProfile = null) {
     try {
       const compressed = await compressPostImage(file)
       const timestamp = Date.now()
-      const ext = compressed?.type === 'image/webp' ? 'webp' : 'jpg'
+      const ext = compressed?.type === 'image/jpeg' ? 'jpg' : 'webp'
       const filePath = `chat/${user.id}/${timestamp}.${ext}`
       const arrayBuffer = await (compressed instanceof Blob ? compressed.arrayBuffer() : file.arrayBuffer())
       const contentType = compressed?.type || file?.type || 'image/webp'

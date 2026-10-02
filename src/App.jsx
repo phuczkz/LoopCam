@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
+import { FriendsProvider } from './contexts/FriendsContext'
 import { useAuth } from './hooks/useAuth'
 import { FullScreenSpinner } from './components/ui/Spinner'
 import { MobileLayout } from './components/layout/MobileLayout'
@@ -12,6 +13,7 @@ import { FriendsPage } from './pages/FriendsPage'
 import { MessagesPage } from './pages/MessagesPage'
 import { ChatPage } from './pages/ChatPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { AllPhotosPage } from './pages/AllPhotosPage'
 
 function ProtectedRoute({ children }) {
   const { session, loading } = useAuth()
@@ -40,6 +42,9 @@ function AppRoutes() {
     <Routes>
       <Route path="/auth" element={<AuthRoute />} />
       <Route path="/camera" element={<ProtectedRoute><CameraPage /></ProtectedRoute>} />
+      <Route path="/all-photos" element={<ProtectedRoute><AllPhotosPage /></ProtectedRoute>} />
+      <Route path="/gallery" element={<Navigate to="/all-photos" replace />} />
+      <Route path="/overview" element={<Navigate to="/all-photos" replace />} />
       <Route path="/memories" element={<ProtectedRoute><MemoriesPage /></ProtectedRoute>} />
       <Route path="/history" element={<Navigate to="/feed" replace />} />
       <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
@@ -56,8 +61,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
-        <Toaster
+        <FriendsProvider>
+          <AppRoutes />
+          <Toaster
           position="top-center"
           toastOptions={{
             duration: 3000,
@@ -78,6 +84,7 @@ export default function App() {
             },
           }}
         />
+        </FriendsProvider>
       </AuthProvider>
     </BrowserRouter>
   )

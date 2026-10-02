@@ -29,34 +29,33 @@ export function usePosts() {
       return cached.url
     }
 
-    // 3. Get public URL (photos bucket is public or public URL is valid)
+    // 3. Prefer permanent public URL ('photos' bucket is public and permanent)
     const { data: pubData } = supabase.storage.from('photos').getPublicUrl(imagePath)
     const publicUrl = pubData?.publicUrl || ''
 
-    // 4. Try signed URL (for private buckets or secure signing)
+    if (publicUrl) {
+      resolvedUrlCache.set(imagePath, {
+        url: publicUrl,
+        expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+      })
+      return publicUrl
+    }
+
+    // 4. Fallback to signed URL (if photos bucket is private)
     try {
       const { data, error } = await supabase.storage
         .from('photos')
-        .createSignedUrl(imagePath, 3600) // 1 hour
+        .createSignedUrl(imagePath, 86400) // 24 hours
 
       if (!error && data?.signedUrl) {
         resolvedUrlCache.set(imagePath, {
           url: data.signedUrl,
-          expiresAt: Date.now() + 50 * 60 * 1000,
+          expiresAt: Date.now() + 23 * 60 * 60 * 1000,
         })
         return data.signedUrl
       }
     } catch (err) {
-      console.warn('createSignedUrl error, falling back to publicUrl:', err)
-    }
-
-    // 5. Fallback to public URL
-    if (publicUrl) {
-      resolvedUrlCache.set(imagePath, {
-        url: publicUrl,
-        expiresAt: Date.now() + 50 * 60 * 1000,
-      })
-      return publicUrl
+      console.warn('createSignedUrl error:', err)
     }
 
     return ''
@@ -80,13 +79,13 @@ export function usePosts() {
         `)
         .eq('recipient_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(100)
 
       if (rErr) {
         console.warn('fetchFeed recipients error:', rErr)
       }
 
-      // 2. Fetch posts created by current user ("những gì tôi đăng lên thì phần Feed cũng phải hiển thị")
+      // 2. Fetch posts created by current user
       const { data: myPosts, error: mErr } = await supabase
         .from('posts')
         .select(`
@@ -95,7 +94,7 @@ export function usePosts() {
         `)
         .eq('sender_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(100)
 
       if (mErr) {
         console.warn('fetchFeed myPosts error:', mErr)
@@ -132,7 +131,7 @@ export function usePosts() {
             `)
             .in('sender_id', friendIds)
             .order('created_at', { ascending: false })
-            .limit(50)
+            .limit(100)
 
           if (!fErr && fPosts) {
             friendsPosts = fPosts

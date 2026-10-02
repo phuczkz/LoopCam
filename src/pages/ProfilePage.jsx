@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useFriends } from '../hooks/useFriends'
+import { FriendRequestBadge } from '../components/ui/FriendRequestBadge'
 import { supabase } from '../lib/supabase'
 import { compressAvatar } from '../lib/imageCompression'
 import { getAvatarUrl } from '../lib/avatarUtils'
@@ -35,7 +36,7 @@ export function ProfilePage() {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
   const { user, profile, signOut, updateProfile } = useAuth()
-  const { friends } = useFriends()
+  const { friends, pendingReceivedCount } = useFriends()
 
   // Fallback data if profile table hasn't populated yet
   const fallbackUsername = (
@@ -128,7 +129,7 @@ export function ProfilePage() {
     setSaving(true)
     try {
       await updateProfile({ full_name: nameInput.trim() })
-      toast.success('Đã cập nhật tên! ✅')
+      toast.success('Đã cập nhật tên!')
       setModalType(null)
     } catch (err) {
       console.error(err)
@@ -143,7 +144,7 @@ export function ProfilePage() {
     setSaving(true)
     try {
       await updateProfile({ birthday: birthdayInput })
-      toast.success('Đã lưu ngày sinh! 🎂')
+      toast.success('Đã lưu ngày sinh!')
       setModalType(null)
     } catch (err) {
       console.error(err)
@@ -166,7 +167,7 @@ export function ProfilePage() {
 
       // 2. Upload avatar to Supabase Storage bucket 'photos'
       const timestamp = Date.now()
-      const ext = compressed.type === 'image/webp' ? 'webp' : 'jpg'
+      const ext = compressed.type === 'image/jpeg' ? 'jpg' : 'webp'
       const fileName = `${timestamp}.${ext}`
       const filePath = `avatars/${user.id}/${fileName}`
       const arrayBuffer = await compressed.arrayBuffer()
@@ -204,7 +205,7 @@ export function ProfilePage() {
       // B. Remove any lingering previous avatar files for this user in storage
       await cleanupOldAvatars(user.id, fileName)
 
-      toast.success('Đã cập nhật ảnh đại diện! 📸')
+      toast.success('Đã cập nhật ảnh đại diện!')
       setModalType(null)
     } catch (err) {
       console.error('handleAvatarFileSelect error:', err)
@@ -249,7 +250,7 @@ export function ProfilePage() {
       <div className="flex flex-col items-center mt-2">
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="relative w-28 h-28 rounded-full border-[3.5px] border-[#E8A020] p-0.5 cursor-pointer btn-press group"
+          className="relative w-28 h-28 rounded-full border-[3.5px] border-[#CCFF00] p-0.5 cursor-pointer btn-press group"
         >
           <img
             src={avatarPreview}
@@ -284,7 +285,7 @@ export function ProfilePage() {
               }
               toast.success(`Đã sao chép: @${fallbackUsername}`)
             }}
-            className="text-[#E8A020] hover:text-[#f3b544] bg-[#E8A020]/15 hover:bg-[#E8A020]/25 text-[12px] font-semibold px-2.5 py-0.5 rounded-full transition-colors flex items-center gap-1 btn-press"
+            className="text-[#CCFF00] hover:text-white bg-[#CCFF00]/15 hover:bg-[#CCFF00]/25 text-[12px] font-semibold px-2.5 py-0.5 rounded-full transition-colors flex items-center gap-1 btn-press"
             title="Bấm để sao chép username"
           >
             <span>@{fallbackUsername}</span>
@@ -307,10 +308,14 @@ export function ProfilePage() {
         <div className="flex flex-col items-center gap-1.5 w-[76px]">
           <button
             onClick={() => navigate('/friends')}
-            className="w-14 h-14 rounded-full bg-[#242426] hover:bg-[#2E2E32] flex items-center justify-center text-white transition-colors btn-press"
+            className="relative w-14 h-14 rounded-full bg-[#242426] hover:bg-[#2E2E32] flex items-center justify-center text-white transition-colors btn-press cursor-pointer"
             aria-label="Bạn bè"
           >
             <Users size={22} />
+            <FriendRequestBadge
+              count={pendingReceivedCount}
+              className="-top-1 -right-1 ring-2 ring-[#121212]"
+            />
           </button>
           <span className="text-[12px] text-white/80 font-medium text-center leading-tight">
             {friends.length} người bạn
@@ -349,11 +354,11 @@ export function ProfilePage() {
       {/* ── LoopCam Gold Banner ── */}
       <div
         onClick={() => setModalType('gold')}
-        className="mt-7 rounded-[26px] border-2 border-[#E8A020]/75 bg-gradient-to-r from-[#1E190E] via-[#1A1813] to-[#141416] p-4 flex items-center justify-between cursor-pointer btn-press hover:border-[#E8A020] transition-all"
+        className="mt-7 rounded-[26px] border-2 border-[#CCFF00]/60 bg-gradient-to-r from-[#121A0E] via-[#141813] to-[#141416] p-4 flex items-center justify-between cursor-pointer btn-press hover:border-[#CCFF00] transition-all"
       >
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-[#2A2312] border border-[#E8A020]/40 flex items-center justify-center flex-shrink-0">
-            <Heart size={22} className="fill-[#E8A020] text-[#E8A020]" />
+          <div className="w-12 h-12 rounded-2xl bg-[#1A260E] border border-[#CCFF00]/40 flex items-center justify-center flex-shrink-0">
+            <Heart size={22} className="fill-[#CCFF00] text-[#CCFF00]" />
           </div>
           <div>
             <h3 className="text-white font-bold text-[15px]">LoopCam Gold</h3>
@@ -374,7 +379,7 @@ export function ProfilePage() {
           </div>
           <button
             onClick={() => setModalType('widget')}
-            className="text-[12px] font-bold text-[#E8A020] bg-[#2A2210] hover:bg-[#382E16] px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors btn-press"
+            className="text-[12px] font-bold text-[#CCFF00] bg-[#CCFF00]/15 hover:bg-[#CCFF00]/25 px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors btn-press"
           >
             Mới +
           </button>
@@ -386,7 +391,7 @@ export function ProfilePage() {
           <div className="bg-[#1C1C1E] rounded-3xl p-4 flex flex-col items-center justify-between aspect-square border border-white/5">
             {/* Overlapping Friend Avatars */}
             <div className="flex items-center justify-center -space-x-3 pt-2">
-              <div className="w-12 h-12 rounded-full border-2 border-[#E8A020] overflow-hidden bg-[#2C2C2E] shadow-lg">
+              <div className="w-12 h-12 rounded-full border-2 border-[#CCFF00] overflow-hidden bg-[#2C2C2E] shadow-lg">
                 <img
                   src={getAvatarUrl(
                     friends[0]?.profile?.avatar_url,
@@ -396,7 +401,7 @@ export function ProfilePage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="w-12 h-12 rounded-full border-2 border-[#E8A020] overflow-hidden bg-[#2C2C2E] shadow-lg">
+              <div className="w-12 h-12 rounded-full border-2 border-[#CCFF00] overflow-hidden bg-[#2C2C2E] shadow-lg">
                 <img
                   src={getAvatarUrl(
                     friends[1]?.profile?.avatar_url,
@@ -421,7 +426,7 @@ export function ProfilePage() {
           {/* Card 2: Tạo Widget */}
           <div className="bg-[#1C1C1E] rounded-3xl p-4 flex flex-col items-center justify-between aspect-square border border-white/5">
             <div className="pt-2 flex items-center justify-center">
-              <div className="w-14 h-14 rounded-full border-2 border-[#E8A020] flex items-center justify-center text-[#E8A020] text-2xl font-light">
+              <div className="w-14 h-14 rounded-full border-2 border-[#CCFF00] flex items-center justify-center text-[#CCFF00] text-2xl font-light">
                 +
               </div>
             </div>
@@ -448,11 +453,14 @@ export function ProfilePage() {
             className="flex items-center justify-between px-4 py-3.5 hover:bg-white/[0.03] cursor-pointer transition-colors btn-press"
           >
             <div className="flex items-center gap-3">
-              <Heart size={18} className="fill-[#E8A020] text-[#E8A020]" />
+              <Heart size={18} className="fill-[#CCFF00] text-[#CCFF00]" />
               <span className="text-[14px] text-white font-medium">Đổi biểu tượng ứng dụng</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-white/70">
-              <span className="flex items-center gap-1">💛 Vàng</span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#CCFF00] shadow-sm"></span>
+                Lime (Neon)
+              </span>
               <ChevronRight size={16} className="text-white/30" />
             </div>
           </div>
@@ -463,11 +471,14 @@ export function ProfilePage() {
             className="flex items-center justify-between px-4 py-3.5 hover:bg-white/[0.03] cursor-pointer transition-colors btn-press"
           >
             <div className="flex items-center gap-3">
-              <Camera size={18} className="text-[#E8A020]" />
+              <Camera size={18} className="text-[#CCFF00]" />
               <span className="text-[14px] text-white font-medium">Chủ đề máy ảnh</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-white/70">
-              <span className="flex items-center gap-1">💛 Vàng</span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#CCFF00] shadow-sm"></span>
+                Lime (Neon)
+              </span>
               <ChevronRight size={16} className="text-white/30" />
             </div>
           </div>
@@ -545,7 +556,7 @@ export function ProfilePage() {
               <span className="text-white/90 text-sm font-bold w-[18px] text-center">@</span>
               <span className="text-[14px] text-white font-medium">Tên người dùng (@username)</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-[#E8A020] font-semibold">
+            <div className="flex items-center gap-1.5 text-xs text-[#CCFF00] font-semibold">
               <span>@{fallbackUsername}</span>
               <ChevronRight size={16} className="text-white/30" />
             </div>
@@ -667,7 +678,7 @@ export function ProfilePage() {
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
               placeholder="Nhập tên mới..."
-              className="w-full bg-[#2C2C2E] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-[#E8A020] text-sm mb-4"
+              className="w-full bg-[#2C2C2E] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-[#CCFF00] text-sm mb-4"
               autoFocus
             />
             <div className="flex gap-2">
@@ -706,7 +717,7 @@ export function ProfilePage() {
               type="date"
               value={birthdayInput}
               onChange={(e) => setBirthdayInput(e.target.value)}
-              className="w-full bg-[#2C2C2E] border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-[#E8A020] text-sm mb-4"
+              className="w-full bg-[#2C2C2E] border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] text-sm mb-4"
             />
             <div className="flex gap-2">
               <button
@@ -733,7 +744,7 @@ export function ProfilePage() {
           <div className="bg-[#1C1C1E] border border-white/10 rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Smartphone size={20} className="text-[#E8A020]" />
+                <Smartphone size={20} className="text-[#CCFF00]" />
                 <h3 className="text-lg font-bold text-white">Cách thêm tiện ích</h3>
               </div>
               <button
@@ -745,15 +756,15 @@ export function ProfilePage() {
             </div>
             <div className="space-y-3 text-xs text-white/70 mb-5">
               <div className="p-3 bg-[#2C2C2E] rounded-xl flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-[#E8A020] text-black font-bold flex items-center justify-center flex-shrink-0 text-[11px]">1</span>
+                <span className="w-5 h-5 rounded-full bg-[#CCFF00] text-black font-bold flex items-center justify-center flex-shrink-0 text-[11px]">1</span>
                 <p>Ra màn hình chính của điện thoại, nhấn giữ vào khoảng trống.</p>
               </div>
               <div className="p-3 bg-[#2C2C2E] rounded-xl flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-[#E8A020] text-black font-bold flex items-center justify-center flex-shrink-0 text-[11px]">2</span>
+                <span className="w-5 h-5 rounded-full bg-[#CCFF00] text-black font-bold flex items-center justify-center flex-shrink-0 text-[11px]">2</span>
                 <p>Nhấn vào dấu <strong>+</strong> ở góc trên màn hình.</p>
               </div>
               <div className="p-3 bg-[#2C2C2E] rounded-xl flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-[#E8A020] text-black font-bold flex items-center justify-center flex-shrink-0 text-[11px]">3</span>
+                <span className="w-5 h-5 rounded-full bg-[#CCFF00] text-black font-bold flex items-center justify-center flex-shrink-0 text-[11px]">3</span>
                 <p>Tìm kiếm <strong>LoopCam</strong> và chọn kích thước tiện ích bạn muốn đặt.</p>
               </div>
             </div>
@@ -770,10 +781,10 @@ export function ProfilePage() {
       {/* Modal: LoopCam Gold */}
       {modalType === 'gold' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#1C1C1E] border border-[#E8A020]/50 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative overflow-hidden">
+          <div className="bg-[#1C1C1E] border border-[#CCFF00]/50 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Sparkles size={20} className="text-[#E8A020]" />
+                <Sparkles size={20} className="text-[#CCFF00]" />
                 <h3 className="text-lg font-bold text-white">LoopCam Gold</h3>
               </div>
               <button
@@ -788,24 +799,24 @@ export function ProfilePage() {
             </p>
             <div className="space-y-2 mb-5">
               <div className="flex items-center gap-2.5 text-xs text-white/90">
-                <Check size={16} className="text-[#E8A020]" />
+                <Check size={16} className="text-[#CCFF00]" />
                 <span>Đổi biểu tượng ứng dụng độc quyền</span>
               </div>
               <div className="flex items-center gap-2.5 text-xs text-white/90">
-                <Check size={16} className="text-[#E8A020]" />
+                <Check size={16} className="text-[#CCFF00]" />
                 <span>Mở khóa toàn bộ chủ đề máy ảnh cao cấp</span>
               </div>
               <div className="flex items-center gap-2.5 text-xs text-white/90">
-                <Check size={16} className="text-[#E8A020]" />
+                <Check size={16} className="text-[#CCFF00]" />
                 <span>Không giới hạn số lượng bạn bè và tiện ích</span>
               </div>
             </div>
             <button
               onClick={() => {
-                toast.success('Tính năng LoopCam Gold đã được kích hoạt miễn phí! 💛')
+                toast.success('Tính năng LoopCam Gold đã được kích hoạt!')
                 setModalType(null)
               }}
-              className="w-full py-3 rounded-xl bg-[#E8A020] text-black font-bold text-sm hover:bg-[#E8A020]/90 btn-press"
+              className="w-full py-3 rounded-xl bg-[#CCFF00] hover:bg-[#b8e600] text-black font-extrabold text-sm btn-press shadow-lg shadow-[#CCFF00]/20"
             >
               Mở khóa ngay
             </button>
@@ -834,7 +845,7 @@ export function ProfilePage() {
             </p>
             <button
               onClick={() => {
-                toast.success('Đã bật thông báo LoopCam! 🔔')
+                toast.success('Đã bật thông báo!')
                 setModalType(null)
               }}
               className="w-full py-3 rounded-xl bg-white text-black font-bold text-sm hover:bg-white/90"

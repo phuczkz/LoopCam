@@ -66,7 +66,7 @@ export function FriendsPage() {
     setActionLoading(userId)
     try {
       await sendFriendRequest(userId)
-      toast.success('Đã gửi lời mời kết bạn! 🤝')
+      toast.success('Đã gửi lời mời kết bạn!')
     } catch (err) {
       toast.error(err.message || 'Không thể gửi lời mời')
     } finally {
@@ -78,7 +78,7 @@ export function FriendsPage() {
     setActionLoading(friendshipId)
     try {
       await acceptRequest(friendshipId)
-      toast.success('Đã chấp nhận kết bạn! 🎉')
+      toast.success('Đã chấp nhận kết bạn!')
     } catch {
       toast.error('Không thể chấp nhận lời mời')
     } finally {
@@ -90,7 +90,7 @@ export function FriendsPage() {
     setActionLoading(friendshipId)
     try {
       await rejectRequest(friendshipId)
-      toast('Đã từ chối lời mời', { icon: '👋' })
+      toast('Đã từ chối lời mời')
     } catch {
       toast.error('Không thể từ chối lời mời')
     } finally {
@@ -103,7 +103,7 @@ export function FriendsPage() {
     setActionLoading(friendshipId)
     try {
       await removeFriend(friendshipId)
-      toast('Đã hủy kết bạn', { icon: '👋' })
+      toast('Đã hủy kết bạn')
     } catch {
       toast.error('Không thể hủy kết bạn')
     } finally {
@@ -134,7 +134,7 @@ export function FriendsPage() {
             onClick={() => setActiveTab(key)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-semibold transition-all duration-300 ${
               activeTab === key
-                ? 'gradient-bg text-white shadow-lg'
+                ? 'bg-[#CCFF00] text-black font-extrabold shadow-md'
                 : 'text-dark-400 hover:text-dark-200'
             }`}
           >
@@ -401,7 +401,7 @@ export function FriendsPage() {
                         <button
                           onClick={() => handleSendRequest(profile.id)}
                           disabled={actionLoading === profile.id}
-                          className="flex items-center gap-1.5 text-xs font-semibold text-white gradient-bg px-3.5 py-2 rounded-full btn-press disabled:opacity-50"
+                          className="flex items-center gap-1.5 text-xs font-extrabold text-black bg-[#CCFF00] hover:bg-[#b8e600] px-3.5 py-2 rounded-full btn-press disabled:opacity-50"
                         >
                           {actionLoading === profile.id ? (
                             <Spinner size={12} className="text-white" />

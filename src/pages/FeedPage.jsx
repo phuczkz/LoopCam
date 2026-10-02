@@ -3,6 +3,7 @@ import { usePosts } from '../hooks/usePosts'
 import { useAuth } from '../hooks/useAuth'
 import { useFriends } from '../hooks/useFriends'
 import { Avatar } from '../components/ui/Avatar'
+import { FriendRequestBadge } from '../components/ui/FriendRequestBadge'
 import {
   Camera,
   ChevronDown,
@@ -13,8 +14,9 @@ import {
   Users,
   Check,
   MessageCircle,
+  Heart,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { encodePostCommentMediaUrl } from '../lib/messageUtils'
@@ -42,24 +44,24 @@ function EmptyFeed() {
   const navigate = useNavigate()
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 px-6 text-center animate-fade-in">
+    <div className="flex flex-col items-center justify-center flex-1 px-6 text-center animate-fade-in select-none">
       <div className="relative mb-6">
-        <div className="w-24 h-24 rounded-full bg-dark-800 flex items-center justify-center animate-pulse-glow ring-2 ring-white/10">
-          <Camera size={40} className="text-white/80" />
+        <div className="w-20 h-20 rounded-full bg-[#1c1c1e] border border-white/10 flex items-center justify-center shadow-xl">
+          <Camera size={36} className="text-white/80" strokeWidth={1.8} />
         </div>
-        <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full gradient-bg flex items-center justify-center shadow-lg">
-          <Sparkles size={16} className="text-white" />
+        <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-[#CCFF00] border-2 border-[#12120e] flex items-center justify-center shadow-md">
+          <Sparkles size={13} className="text-black" strokeWidth={2.5} />
         </div>
       </div>
-      <h2 className="text-2xl font-bold text-white mb-2">Chưa có ảnh nào!</h2>
-      <p className="text-dark-300 text-sm mb-8 leading-relaxed max-w-[280px]">
-        Hãy chụp một bức ảnh để chia sẻ khoảnh khắc với bạn bè hoặc lưu lại nhật ký 📸
+      <h2 className="text-xl font-bold text-white mb-2 tracking-tight">Chưa có ảnh nào!</h2>
+      <p className="text-white/50 text-sm mb-7 leading-relaxed max-w-[260px]">
+        Hãy chụp một bức ảnh để chia sẻ khoảnh khắc với bạn bè hoặc lưu lại nhật ký.
       </p>
       <button
         onClick={() => navigate('/camera')}
-        className="gradient-bg px-8 py-3.5 rounded-2xl text-white font-bold text-base btn-press shadow-xl shadow-accent-violet/30 flex items-center gap-2"
+        className="bg-[#CCFF00] hover:bg-[#b8e600] active:scale-95 text-black font-extrabold text-sm sm:text-base px-7 py-3.5 rounded-full shadow-lg shadow-[#CCFF00]/20 flex items-center gap-2.5 transition-all cursor-pointer"
       >
-        <Camera size={20} />
+        <Camera size={19} strokeWidth={2.4} />
         <span>Chụp ảnh ngay</span>
       </button>
     </div>
@@ -81,9 +83,10 @@ function FeedSkeleton() {
 
 export function FeedPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, profile } = useAuth()
   const { feed, loading, deletePost } = usePosts()
-  const { friends } = useFriends()
+  const { friends, pendingReceivedCount } = useFriends()
 
   // Filter: 'all' | 'mine' | friend_id
   const [filter, setFilter] = useState('all')
@@ -101,6 +104,16 @@ export function FeedPage() {
     if (filter === 'mine') return feed.filter((p) => p.isMine)
     return feed.filter((p) => p.sender_id === filter)
   }, [feed, filter])
+
+  // If navigating from AllPhotosPage with initialPostId, jump to that photo
+  useEffect(() => {
+    if (location.state?.initialPostId && activeFeed.length > 0) {
+      const idx = activeFeed.findIndex((p) => p.id === location.state.initialPostId)
+      if (idx !== -1) {
+        setCurrentIndex(idx)
+      }
+    }
+  }, [location.state?.initialPostId, activeFeed])
 
   // Safe index within bounds
   const safeIndex = activeFeed.length > 0
@@ -226,10 +239,9 @@ export function FeedPage() {
     }
 
     const imageUrl =
-      post.signedImageUrl ||
       (post.image_path
         ? supabase.storage.from('photos').getPublicUrl(post.image_path).data?.publicUrl
-        : '')
+        : '') || post.signedImageUrl
 
     if (!imageUrl) {
       toast.error('Không tìm thấy ảnh của khoảnh khắc')
@@ -279,13 +291,13 @@ export function FeedPage() {
       toast.success(
         (t) => (
           <div className="flex items-center justify-between gap-3 select-none">
-            <span>Đã gửi tới {recipientDisplayName}! 💬</span>
+            <span>Đã gửi tới {recipientDisplayName}!</span>
             <button
               onClick={() => {
                 toast.dismiss(t.id)
                 navigate(`/messages/${recipientId}`)
               }}
-              className="text-amber-400 font-bold underline text-xs cursor-pointer"
+              className="text-[#CCFF00] font-bold underline text-xs cursor-pointer"
             >
               Xem chat
             </button>
@@ -293,8 +305,6 @@ export function FeedPage() {
         ),
         { duration: 4000 }
       )
-
-      setMessageInput('')
     } catch (err) {
       console.error('Send comment error:', err)
       toast.error('Không thể gửi bình luận. Thử lại sau!')
@@ -354,7 +364,7 @@ export function FeedPage() {
       <div className="flex items-center justify-between mb-3 z-30 flex-shrink-0 animate-fade-in relative">
         {/* Left: Megaphone / Announcement */}
         <button
-          onClick={() => toast('Tính năng thông báo mới sắp ra mắt! 📢')}
+          onClick={() => toast('Tính năng thông báo mới sắp ra mắt!')}
           className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/15 flex items-center justify-center btn-press text-white/90"
           aria-label="Thông báo"
         >
@@ -398,7 +408,7 @@ export function FeedPage() {
                   <Users size={16} />
                   <span>Mọi người</span>
                 </div>
-                {filter === 'all' && <Check size={16} className="text-[#E8A020]" />}
+                {filter === 'all' && <Check size={16} className="text-[#CCFF00]" />}
               </button>
 
               <button
@@ -417,7 +427,7 @@ export function FeedPage() {
                   <Camera size={16} />
                   <span>Ảnh của tôi</span>
                 </div>
-                {filter === 'mine' && <Check size={16} className="text-[#E8A020]" />}
+                {filter === 'mine' && <Check size={16} className="text-[#CCFF00]" />}
               </button>
 
               {friends.length > 0 && (
@@ -451,7 +461,7 @@ export function FeedPage() {
                         {friend.profile?.full_name || friend.profile?.username || 'Bạn bè'}
                       </span>
                     </div>
-                    {isSelected && <Check size={16} className="text-[#E8A020]" />}
+                    {isSelected && <Check size={16} className="text-[#CCFF00]" />}
                   </button>
                 )
               })}
@@ -462,7 +472,7 @@ export function FeedPage() {
         {/* Right: Current User Avatar */}
         <button
           onClick={() => navigate('/profile')}
-          className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/20 btn-press"
+          className="relative w-10 h-10 rounded-full ring-2 ring-white/20 btn-press cursor-pointer flex items-center justify-center"
           aria-label="Trang cá nhân"
         >
           <Avatar
@@ -470,6 +480,7 @@ export function FeedPage() {
             alt={profile?.full_name || 'Me'}
             size={40}
           />
+          <FriendRequestBadge count={pendingReceivedCount} />
         </button>
       </div>
 
@@ -508,9 +519,12 @@ export function FeedPage() {
               <img
                 src={currentPost.signedImageUrl}
                 alt={currentPost.caption || 'Khoảnh khắc'}
-                className={`w-full h-full object-cover transition-opacity duration-300 ${
+                loading="eager"
+                decoding="async"
+                className={`w-full h-full object-cover select-none transition-opacity duration-300 ${
                   loadedImages[currentPost.id] ? 'opacity-100' : 'opacity-0'
                 }`}
+                style={{ imageRendering: 'auto' }}
                 onLoad={() =>
                   setLoadedImages((prev) => ({ ...prev, [currentPost.id]: true }))
                 }
@@ -526,7 +540,7 @@ export function FeedPage() {
             {/* Double Tap Heart Burst Animation */}
             {showHeartBurst && (
               <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none animate-ping">
-                <span className="text-6xl drop-shadow-2xl">❤️</span>
+                <Heart size={72} className="text-red-500 fill-red-500 drop-shadow-[0_4px_24px_rgba(239,68,68,0.7)]" />
               </div>
             )}
 
@@ -608,28 +622,28 @@ export function FeedPage() {
               </span>
             </button>
 
-            {/* Quick Emoji Reactions matching screenshot */}
+            {/* Quick Emoji Reactions */}
             <div className="flex items-center gap-1.5 flex-shrink-0">
               <button
-                onClick={() => handleSendComment({ text: '🍲', post: currentPost })}
+                onClick={() => handleSendComment({ text: '❤️', post: currentPost })}
                 className="text-lg hover:scale-125 transition-transform btn-press p-1 cursor-pointer"
-                aria-label="Thả emoji lẩu"
+                aria-label="Thả tim"
               >
-                🍲
+                ❤️
               </button>
               <button
-                onClick={() => handleSendComment({ text: '🥄', post: currentPost })}
+                onClick={() => handleSendComment({ text: '🔥', post: currentPost })}
                 className="text-lg hover:scale-125 transition-transform btn-press p-1 cursor-pointer"
-                aria-label="Thả emoji thìa"
+                aria-label="Thả lửa"
               >
-                🥄
+                🔥
               </button>
               <button
-                onClick={() => handleSendComment({ text: '🫶', post: currentPost })}
+                onClick={() => handleSendComment({ text: '😂', post: currentPost })}
                 className="text-lg hover:scale-125 transition-transform btn-press p-1 cursor-pointer"
-                aria-label="Thả emoji trái tim tay"
+                aria-label="Thả cười"
               >
-                🫶
+                😂
               </button>
               <button
                 onClick={() => setIsReplyModalOpen(true)}

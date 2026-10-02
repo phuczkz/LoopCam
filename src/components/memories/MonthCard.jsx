@@ -95,17 +95,7 @@ export const MonthCard = memo(function MonthCard({
               key={cell.id}
               className="w-full aspect-square rounded-[11px] sm:rounded-[13px] bg-[#242424] flex items-center justify-center select-none shadow-inner"
               aria-label={`Ngày ${cell.day}`}
-            >
-              {cell.isOct31 && (
-                <span
-                  className="text-[16px] sm:text-[17px] leading-none"
-                  role="img"
-                  aria-label="Halloween 🎃"
-                >
-                  🎃
-                </span>
-              )}
-            </div>
+            />
           )
         })}
       </div>

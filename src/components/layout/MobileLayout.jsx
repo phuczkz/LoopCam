@@ -5,11 +5,12 @@ export function MobileLayout({ children }) {
   const location = useLocation()
   const isChatDetail = location.pathname.startsWith('/messages/') && location.pathname !== '/messages'
   const isFeed = location.pathname === '/feed'
+  const isAllPhotos = location.pathname === '/all-photos' || location.pathname === '/gallery'
 
   return (
     <div className="relative w-full h-full max-w-[430px] mx-auto bg-black overflow-hidden flex flex-col">
       {/* Page Content */}
-      <main className={`h-full ${isChatDetail || isFeed ? 'overflow-hidden flex flex-col' : 'overflow-y-auto pb-24 safe-top'}`}>
+      <main className={`h-full ${isChatDetail || isFeed || isAllPhotos ? 'overflow-hidden flex flex-col' : 'overflow-y-auto pb-24 safe-top'}`}>
         {children}
       </main>
 

@@ -14,11 +14,11 @@ export function Button({
   const baseClasses = 'relative flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 btn-press disabled:opacity-50 disabled:pointer-events-none'
 
   const variants = {
-    primary: 'gradient-bg text-white shadow-lg shadow-accent-violet/20',
+    primary: 'bg-[#CCFF00] hover:bg-[#b8e600] text-black font-extrabold shadow-lg shadow-[#CCFF00]/20',
     secondary: 'glass text-white hover:bg-glass-hover',
     ghost: 'text-dark-200 hover:text-white hover:bg-dark-700',
     danger: 'bg-red-500/20 text-red-400 hover:bg-red-500/30',
-    outline: 'gradient-border text-white hover:bg-glass-white',
+    outline: 'border border-white/20 text-white hover:bg-white/10',
   }
 
   const sizes = {

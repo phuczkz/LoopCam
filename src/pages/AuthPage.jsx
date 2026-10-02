@@ -28,7 +28,7 @@ export function AuthPage() {
     try {
       if (isLogin) {
         await signIn({ email: form.email, password: form.password })
-        toast.success('Welcome back! 👋')
+        toast.success('Đăng nhập thành công!')
       } else {
         // Validation
         if (!form.username.trim()) {
@@ -53,7 +53,7 @@ export function AuthPage() {
           username: form.username,
           fullName: form.fullName || form.username,
         })
-        toast.success('Account created! 🎉')
+        toast.success('Tạo tài khoản thành công!')
       }
     } catch (error) {
       toast.error(error.message || 'Something went wrong')
@@ -65,16 +65,15 @@ export function AuthPage() {
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center px-6 py-8 overflow-y-auto">
       {/* Animated Background Blobs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[280px] h-[280px] rounded-full bg-accent-violet/20 blur-[90px] animate-pulse pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[260px] h-[260px] rounded-full bg-accent-rose/15 blur-[90px] animate-pulse pointer-events-none" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-[35%] right-[-15%] w-[180px] h-[180px] rounded-full bg-accent-orange/10 blur-[70px] animate-pulse pointer-events-none" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-[-10%] left-[-10%] w-[280px] h-[280px] rounded-full bg-[#CCFF00]/10 blur-[90px] animate-pulse pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[260px] h-[260px] rounded-full bg-white/5 blur-[90px] animate-pulse pointer-events-none" style={{ animationDelay: '1s' }} />
 
       {/* Logo */}
       <div className="relative z-10 flex flex-col items-center mb-6 animate-fade-in">
-        <div className="w-18 h-18 rounded-3xl gradient-bg flex items-center justify-center shadow-xl shadow-accent-violet/30 mb-3">
-          <Camera size={34} className="text-white" />
+        <div className="w-18 h-18 rounded-3xl bg-[#CCFF00] flex items-center justify-center shadow-xl shadow-[#CCFF00]/25 mb-3">
+          <Camera size={34} className="text-black" strokeWidth={2.2} />
         </div>
-        <h1 className="text-3xl font-extrabold gradient-text tracking-tight">LoopCam</h1>
+        <h1 className="text-3xl font-extrabold text-white tracking-tight">LoopCam</h1>
         <p className="text-dark-300 text-xs font-medium mt-1">Share moments with closest friends</p>
       </div>
 
@@ -88,7 +87,7 @@ export function AuthPage() {
               onClick={() => setIsLogin(true)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                 isLogin
-                  ? 'gradient-bg text-white shadow-md'
+                  ? 'bg-[#CCFF00] text-black font-extrabold shadow-md'
                   : 'text-dark-400 hover:text-dark-200'
               }`}
             >
@@ -99,7 +98,7 @@ export function AuthPage() {
               onClick={() => setIsLogin(false)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                 !isLogin
-                  ? 'gradient-bg text-white shadow-md'
+                  ? 'bg-[#CCFF00] text-black font-extrabold shadow-md'
                   : 'text-dark-400 hover:text-dark-200'
               }`}
             >

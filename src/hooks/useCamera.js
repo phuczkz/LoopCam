@@ -31,8 +31,8 @@ export function useCamera() {
       const constraints = {
         video: {
           facingMode: facingFront ? 'user' : 'environment',
-          width: { ideal: 1080 },
-          height: { ideal: 1080 },
+          width: { ideal: 1920 },
+          height: { ideal: 1920 },
         },
         audio: false,
       }
@@ -78,12 +78,14 @@ export function useCamera() {
 
     if (!video || !canvas) return null
 
-    // Set canvas to square crop from center
+    // Set canvas to square crop from center at full video resolution
     const size = Math.min(video.videoWidth, video.videoHeight)
     canvas.width = size
     canvas.height = size
 
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
 
     // Mirror if front camera
     if (isFrontCamera) {
@@ -97,20 +99,17 @@ export function useCamera() {
 
     ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size)
 
-    // iOS Safari does NOT support 'image/webp' in canvas.toBlob — use 'image/jpeg' as universal fallback
-    const mimeType = canvas.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg'
-
+    // Export lossless PNG in memory for the preview so zero quality is lost before upload
     canvas.toBlob(
       (blob) => {
         if (blob) {
           const url = URL.createObjectURL(blob)
-          setCapturedImage({ blob, url, mimeType })
+          setCapturedImage({ blob, url, mimeType: 'image/png' })
         } else {
-          console.error('canvas.toBlob returned null — format not supported')
+          console.error('canvas.toBlob returned null')
         }
       },
-      mimeType,
-      0.85
+      'image/png'
     )
 
     stopCamera()

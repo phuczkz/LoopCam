@@ -2,11 +2,14 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useMemories } from '../hooks/useMemories'
+import { useFriends } from '../hooks/useFriends'
 import { MonthCard } from '../components/memories/MonthCard'
 import { MonthConnector } from '../components/memories/MonthConnector'
 import { PhotoViewerModal } from '../components/memories/PhotoViewerModal'
 import { Avatar } from '../components/ui/Avatar'
+import { FriendRequestBadge } from '../components/ui/FriendRequestBadge'
 import { Spinner } from '../components/ui/Spinner'
+import { Heart, Flame } from 'lucide-react'
 
 // Generate calendar cells for a given month and year
 function buildMonthData(year, month, postsByDate, todayKey) {
@@ -78,6 +81,7 @@ export function MemoriesPage() {
   const { profile } = useAuth()
   const { memories, postsByDate, todayKey, totalPhotos, streak, loading, deleteMemory } =
     useMemories()
+  const { pendingReceivedCount } = useFriends()
 
   const [activePhotoGroup, setActivePhotoGroup] = useState(null) // { posts, dateKey }
   const [currentDate] = useState(() => new Date())
@@ -139,7 +143,7 @@ export function MemoriesPage() {
         {/* Top-Right Avatar of Real Current User */}
         <button
           onClick={() => navigate('/profile')}
-          className="active:scale-95 transition-transform flex-shrink-0 cursor-pointer"
+          className="relative active:scale-95 transition-transform flex-shrink-0 cursor-pointer flex items-center justify-center"
           title="Trang cá nhân"
           aria-label="Trang cá nhân"
         >
@@ -149,6 +153,7 @@ export function MemoriesPage() {
             size={38}
             className="ring-2 ring-white/15 shadow-md"
           />
+          <FriendRequestBadge count={pendingReceivedCount} />
         </button>
       </header>
 
@@ -188,13 +193,13 @@ export function MemoriesPage() {
                     <div className="w-full flex justify-center mb-6">
                       <div className="inline-flex items-center gap-3.5 px-6 py-2.5 rounded-full bg-[#141414] border border-white/10 shadow-2xl text-white text-[14px] font-semibold">
                         <span className="flex items-center gap-1.5">
-                          <span className="text-base">💛</span>
+                          <Heart size={15} className="text-[#CCFF00] fill-[#CCFF00]" />
                           <span>{totalPhotos} LoopCam</span>
                         </span>
                         <span className="text-white/20 select-none">|</span>
                         <span className="flex items-center gap-1.5">
-                          <span className="text-base">🔥</span>
-                          <span>chuỗi {streak}ngày</span>
+                          <Flame size={15} className="text-orange-500 fill-orange-500" />
+                          <span>chuỗi {streak} ngày</span>
                         </span>
                       </div>
                     </div>

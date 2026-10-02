@@ -52,7 +52,7 @@ export function PhotoViewerModal({
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-      toast.success('Đã tải ảnh về máy! 📥')
+      toast.success('Đã tải ảnh về máy!')
     } catch {
       window.open(currentPost.signedImageUrl, '_blank')
     }
@@ -71,7 +71,7 @@ export function PhotoViewerModal({
       }
     } else {
       await navigator.clipboard.writeText(currentPost.signedImageUrl)
-      toast.success('Đã sao chép liên kết ảnh! 🔗')
+      toast.success('Đã sao chép liên kết ảnh!')
     }
   }
 

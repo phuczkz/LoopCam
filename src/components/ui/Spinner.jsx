@@ -23,12 +23,7 @@ export function FullScreenSpinner() {
   return (
     <div className="fixed inset-0 bg-dark-900 flex items-center justify-center z-50">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-full gradient-bg animate-spin opacity-80"
-          style={{
-            mask: 'conic-gradient(transparent 30%, black)',
-            WebkitMask: 'conic-gradient(transparent 30%, black)',
-          }}
-        />
+        <div className="w-12 h-12 rounded-full border-3 border-white/10 border-t-[#CCFF00] animate-spin" />
         <p className="text-dark-300 text-sm font-medium">Loading...</p>
       </div>
     </div>

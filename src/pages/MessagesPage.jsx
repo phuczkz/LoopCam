@@ -4,6 +4,7 @@ import { useConversations } from '../hooks/useMessages'
 import { useFriends } from '../hooks/useFriends'
 import { useAuth } from '../hooks/useAuth'
 import { Avatar } from '../components/ui/Avatar'
+import { FriendRequestBadge } from '../components/ui/FriendRequestBadge'
 import { Spinner } from '../components/ui/Spinner'
 import { formatConversationTime } from '../lib/dateUtils'
 import {
@@ -20,7 +21,7 @@ export function MessagesPage() {
   const navigate = useNavigate()
   const { profile } = useAuth()
   const { conversations, loading } = useConversations()
-  const { friends, loading: friendsLoading } = useFriends()
+  const { friends, pendingReceivedCount, loading: friendsLoading } = useFriends()
 
   // New Chat Bottom Sheet / Modal state
   const [isNewChatOpen, setIsNewChatOpen] = useState(false)
@@ -41,11 +42,12 @@ export function MessagesPage() {
         {/* Left Friends Button */}
         <button
           onClick={() => navigate('/friends')}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+          className="relative w-10 h-10 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
           aria-label="Danh sách bạn bè"
           title="Bạn bè"
         >
           <Users size={20} />
+          <FriendRequestBadge count={pendingReceivedCount} />
         </button>
 
         {/* Center Title */}
@@ -56,7 +58,7 @@ export function MessagesPage() {
         {/* Right User Avatar */}
         <button
           onClick={() => navigate('/profile')}
-          className="focus:outline-none btn-press cursor-pointer"
+          className="relative focus:outline-none btn-press cursor-pointer flex items-center justify-center"
           aria-label="Hồ sơ cá nhân"
         >
           <Avatar
@@ -65,6 +67,7 @@ export function MessagesPage() {
             size={36}
             className="ring-1 ring-white/15"
           />
+          <FriendRequestBadge count={pendingReceivedCount} />
         </button>
       </div>
 
@@ -98,7 +101,7 @@ export function MessagesPage() {
               const timeDisplay = formatConversationTime(lastMessage?.created_at)
               const isMedia = Boolean(lastMessage?.media_url)
               const previewText = isMedia
-                ? lastMessage?.content ? `📷 ${lastMessage.content}` : '📷 [Hình ảnh]'
+                ? lastMessage?.content ? `[Ảnh] ${lastMessage.content}` : '[Hình ảnh]'
                 : lastMessage?.content || ''
 
               return (
@@ -154,10 +157,10 @@ export function MessagesPage() {
         )}
       </div>
 
-      {/* Floating Yellow Action Button (Pencil icon as in Screenshot 1) */}
+      {/* Floating Action Button */}
       <button
         onClick={() => setIsNewChatOpen(true)}
-        className="fixed bottom-24 right-5 z-30 w-13 h-13 rounded-full bg-[#EAB308] hover:bg-[#FACC15] active:scale-95 text-black shadow-lg shadow-amber-500/20 flex items-center justify-center transition-transform cursor-pointer"
+        className="fixed bottom-24 right-5 z-30 w-13 h-13 rounded-full bg-[#CCFF00] hover:bg-[#b8e600] active:scale-95 text-black shadow-lg shadow-[#CCFF00]/25 flex items-center justify-center transition-transform cursor-pointer"
         aria-label="Tin nhắn mới"
       >
         <Pencil size={22} strokeWidth={2.4} />
@@ -187,7 +190,7 @@ export function MessagesPage() {
                   placeholder="Tìm bạn bè..."
                   value={friendSearch}
                   onChange={(e) => setFriendSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-[#222222] border border-white/10 rounded-full text-sm text-white placeholder-[#888888] focus:outline-none focus:border-amber-400"
+                  className="w-full pl-9 pr-4 py-2 bg-[#222222] border border-white/10 rounded-full text-sm text-white placeholder-[#888888] focus:outline-none focus:border-[#CCFF00]"
                 />
               </div>
             </div>
@@ -211,7 +214,7 @@ export function MessagesPage() {
                         setIsNewChatOpen(false)
                         navigate('/friends')
                       }}
-                      className="mt-3 inline-flex items-center gap-1.5 text-xs text-amber-400 font-semibold hover:underline"
+                      className="mt-3 inline-flex items-center gap-1.5 text-xs text-[#CCFF00] font-semibold hover:underline"
                     >
                       <UserPlus size={14} />
                       Tìm bạn mới

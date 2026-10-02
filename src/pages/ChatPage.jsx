@@ -142,10 +142,10 @@ export function ChatPage() {
             src={friendProfile?.avatar_url}
             alt={friendName}
             size={48}
-            className="ring-2 ring-white/15 group-hover:ring-amber-400 transition-all shadow-md"
+            className="ring-2 ring-white/15 group-hover:ring-[#CCFF00] transition-all shadow-md"
           />
           <div className="flex items-center gap-1 mt-1.5">
-            <span className="text-xs font-semibold text-white/95 group-hover:text-amber-400 transition-colors">
+            <span className="text-xs font-semibold text-white/95 group-hover:text-[#CCFF00] transition-colors">
               {friendName}
             </span>
             <ChevronRight size={13} className="text-[#888888]" />
@@ -415,7 +415,7 @@ export function ChatPage() {
             type="button"
             onClick={() => setShowEmojiPicker((prev) => !prev)}
             className={`w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer ${
-              showEmojiPicker ? 'text-amber-400' : ''
+              showEmojiPicker ? 'text-[#CCFF00]' : ''
             }`}
             aria-label="Chọn biểu cảm"
           >

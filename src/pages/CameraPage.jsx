@@ -4,9 +4,10 @@ import { useCamera } from '../hooks/useCamera'
 import { usePosts } from '../hooks/usePosts'
 import { useFriends } from '../hooks/useFriends'
 import { useAuth } from '../hooks/useAuth'
-import { compressPostImage, blobToFile } from '../lib/imageCompression'
+import { blobToFile } from '../lib/imageCompression'
 import { getAvatarUrl } from '../lib/avatarUtils'
 import { Avatar } from '../components/ui/Avatar'
+import { FriendRequestBadge } from '../components/ui/FriendRequestBadge'
 import { Spinner } from '../components/ui/Spinner'
 import {
   SwitchCamera,
@@ -22,6 +23,17 @@ import {
   Camera,
   Download,
   UserPlus,
+  Type,
+  Star,
+  Music,
+  MapPin,
+  Sun,
+  Clock,
+  Flame,
+  Sparkles,
+  PartyPopper,
+  Shirt,
+  Heart,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -34,13 +46,50 @@ function getFormattedTime() {
   return `${hours}:${minutes} ${period}`
 }
 
+function getWidgetSvg(id, color = '#ffffff') {
+  switch (id) {
+    case 'review':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${color}" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+    case 'music':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`
+    case 'location':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`
+    case 'weather':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`
+    case 'time':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+    case 'streak':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${color}" stroke="none"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`
+    case 'zodiac':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`
+    case 'party':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/></svg>`
+    case 'ootd':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>`
+    case 'missyou':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${color}" stroke="none"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`
+    default:
+      return null
+  }
+}
+
+function loadSvgImage(svgString) {
+  if (!svgString) return Promise.resolve(null)
+  return new Promise((resolve) => {
+    const iconImg = new Image()
+    iconImg.onload = () => resolve(iconImg)
+    iconImg.onerror = () => resolve(null)
+    iconImg.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
+  })
+}
+
 const CAPTION_WIDGETS = [
   {
     id: 'text',
     category: 'General',
     label: 'Văn bản',
-    pillText: 'Aa Văn bản',
-    iconText: 'Aa',
+    pillText: 'Văn bản',
+    Icon: Type,
     defaultText: '',
     placeholder: 'Thêm một tin nhắn',
     sheetBg: 'bg-[#28282a]',
@@ -51,8 +100,8 @@ const CAPTION_WIDGETS = [
     category: 'General',
     label: 'Review',
     pillText: 'Review',
-    iconText: '⭐',
-    defaultText: '⭐⭐⭐⭐⭐ Rất thích!',
+    Icon: Star,
+    defaultText: 'Rất thích!',
     placeholder: 'Viết review ngắn...',
     sheetBg: 'bg-[#28282a]',
     textColor: 'text-white',
@@ -62,8 +111,8 @@ const CAPTION_WIDGETS = [
     category: 'General',
     label: 'Đang phát',
     pillText: 'Đang phát',
-    iconText: '🎵',
-    defaultText: 'Đang phát • Bài hát yêu thích ♫',
+    Icon: Music,
+    defaultText: 'Đang phát • Bài hát yêu thích',
     placeholder: 'Tên bài hát...',
     sheetBg: 'bg-[#28282a]',
     textColor: 'text-white',
@@ -73,7 +122,7 @@ const CAPTION_WIDGETS = [
     category: 'General',
     label: 'Vị trí',
     pillText: 'Vị trí',
-    iconText: '📍',
+    Icon: MapPin,
     defaultText: 'Vị trí của tôi',
     placeholder: 'Nhập vị trí...',
     sheetBg: 'bg-[#28282a]',
@@ -84,10 +133,10 @@ const CAPTION_WIDGETS = [
     category: 'General',
     label: 'Thời tiết',
     pillText: 'Thời tiết',
-    iconText: '☀️',
+    Icon: Sun,
     defaultText: '28°C • Nắng đẹp',
     placeholder: 'Thời tiết...',
-    sheetBg: 'bg-[#38bdf8]',
+    sheetBg: 'bg-[#0284c7]',
     textColor: 'text-white font-bold',
   },
   {
@@ -95,18 +144,18 @@ const CAPTION_WIDGETS = [
     category: 'General',
     label: 'Thời gian',
     pillText: getFormattedTime(),
-    iconText: '🕒',
+    Icon: Clock,
     defaultText: getFormattedTime(),
     placeholder: 'Thời gian...',
     sheetBg: 'bg-[#28282a]',
-    textColor: 'text-white',
+    textColor: 'text-white font-semibold',
   },
   {
     id: 'streak',
     category: 'General',
     label: 'Streak',
-    pillText: '1',
-    iconText: '🔥',
+    pillText: '1 ngày',
+    Icon: Flame,
     defaultText: '1 ngày liên tiếp',
     placeholder: 'Số ngày chuỗi...',
     sheetBg: 'bg-[#f59e0b]',
@@ -117,8 +166,8 @@ const CAPTION_WIDGETS = [
     category: 'General',
     label: 'Mùa Thiên Bình',
     pillText: 'Mùa Thiên Bình',
-    iconText: '♎',
-    defaultText: 'Mùa Thiên Bình ✨',
+    Icon: Sparkles,
+    defaultText: 'Mùa Thiên Bình',
     placeholder: 'Cung hoàng đạo...',
     sheetBg: 'bg-[#fce7f3] border border-[#f472b6]/30',
     textColor: 'text-[#831843] font-semibold',
@@ -128,19 +177,19 @@ const CAPTION_WIDGETS = [
     category: 'Decorative',
     label: 'Party Time!',
     pillText: 'Party Time!',
-    iconText: '🪩',
-    defaultText: 'Party Time! 🎉',
+    Icon: PartyPopper,
+    defaultText: 'Party Time!',
     placeholder: 'Tiệc tùng...',
-    sheetBg: 'bg-gradient-to-r from-[#86efac] via-[#6ee7b7] to-[#67e8f9]',
-    textColor: 'text-[#064e3b] font-bold',
+    sheetBg: 'bg-[#10b981]',
+    textColor: 'text-black font-bold',
   },
   {
     id: 'ootd',
     category: 'Decorative',
     label: 'OOTD',
     pillText: 'OOTD',
-    iconText: '🕶️',
-    defaultText: 'Outfit Of The Day ✨',
+    Icon: Shirt,
+    defaultText: 'Outfit Of The Day',
     placeholder: 'Trang phục...',
     sheetBg: 'bg-white',
     textColor: 'text-black font-bold',
@@ -150,10 +199,10 @@ const CAPTION_WIDGETS = [
     category: 'Decorative',
     label: 'Miss you',
     pillText: 'Miss you',
-    iconText: '🥰',
-    defaultText: 'Miss you so much ❤️',
+    Icon: Heart,
+    defaultText: 'Miss you so much',
     placeholder: 'Lời nhắn...',
-    sheetBg: 'bg-gradient-to-r from-[#f43f5e] to-[#ef4444]',
+    sheetBg: 'bg-[#e11d48]',
     textColor: 'text-white font-bold',
   },
 ]
@@ -163,33 +212,46 @@ async function drawBadgeOnImage(blob, widget, customVal) {
   return new Promise((resolve) => {
     const img = new Image()
     const url = URL.createObjectURL(blob)
-    img.onload = () => {
+    img.onload = async () => {
       URL.revokeObjectURL(url)
       const canvas = document.createElement('canvas')
       canvas.width = img.naturalWidth || 1080
       canvas.height = img.naturalHeight || 1080
-      const ctx = canvas.getContext('2d')
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
 
       // Draw photo
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
-      // Badge content
-      let text = customVal || widget.defaultText || widget.pillText
-      let icon = widget.iconText
-
-      let displayText = `${icon} ${text}`.trim()
-      if (widget.id === 'streak') {
-        displayText = `🔥 ${customVal || '1 ngày liên tiếp'}`
-      } else if (widget.id === 'time') {
-        displayText = `🕒 ${getFormattedTime()}`
+      let textColor = '#ffffff'
+      if (widget.id === 'streak' || widget.id === 'ootd' || widget.id === 'party') {
+        textColor = '#0f172a'
+      } else if (widget.id === 'zodiac') {
+        textColor = '#831843'
       }
+
+      // Badge content without raw system emojis
+      let displayText = (customVal || widget.defaultText || widget.pillText || '').trim()
+      if (widget.id === 'streak' && !customVal) {
+        displayText = '1 ngày liên tiếp'
+      } else if (widget.id === 'time' && !customVal) {
+        displayText = getFormattedTime()
+      }
+
+      const iconSvg = getWidgetSvg(widget.id, textColor)
+      const iconImg = await loadSvgImage(iconSvg)
 
       const fontSize = Math.round(canvas.width * 0.038)
       ctx.font = `bold ${fontSize}px Inter, sans-serif`
       const textWidth = ctx.measureText(displayText).width
+      const iconSize = iconImg ? Math.round(fontSize * 1.1) : 0
+      const gap = iconImg ? Math.round(fontSize * 0.35) : 0
       const paddingX = Math.round(canvas.width * 0.045)
       const paddingY = Math.round(canvas.height * 0.016)
-      const pillWidth = Math.min(canvas.width * 0.88, textWidth + paddingX * 2)
+
+      const totalContentWidth = iconSize + gap + textWidth
+      const pillWidth = Math.min(canvas.width * 0.88, totalContentWidth + paddingX * 2)
       const pillHeight = fontSize + paddingY * 2
       const pillX = (canvas.width - pillWidth) / 2
       const pillY = canvas.height - Math.round(canvas.height * 0.12)
@@ -200,23 +262,17 @@ async function drawBadgeOnImage(blob, widget, customVal) {
       ctx.roundRect(pillX, pillY, pillWidth, pillHeight, radius)
 
       if (widget.id === 'weather') {
-        ctx.fillStyle = '#38bdf8'
+        ctx.fillStyle = '#0284c7'
       } else if (widget.id === 'streak') {
         ctx.fillStyle = '#f59e0b'
       } else if (widget.id === 'zodiac') {
         ctx.fillStyle = '#fce7f3'
       } else if (widget.id === 'party') {
-        const grad = ctx.createLinearGradient(pillX, pillY, pillX + pillWidth, pillY)
-        grad.addColorStop(0, '#86efac')
-        grad.addColorStop(1, '#67e8f9')
-        ctx.fillStyle = grad
+        ctx.fillStyle = '#10b981'
       } else if (widget.id === 'ootd') {
         ctx.fillStyle = '#ffffff'
       } else if (widget.id === 'missyou') {
-        const grad = ctx.createLinearGradient(pillX, pillY, pillX + pillWidth, pillY)
-        grad.addColorStop(0, '#f43f5e')
-        grad.addColorStop(1, '#ef4444')
-        ctx.fillStyle = grad
+        ctx.fillStyle = '#e11d48'
       } else {
         ctx.fillStyle = 'rgba(28, 28, 30, 0.92)'
       }
@@ -227,22 +283,27 @@ async function drawBadgeOnImage(blob, widget, customVal) {
       ctx.fill()
       ctx.restore()
 
+      // Draw vector icon if present
+      if (iconImg) {
+        const iconX = (canvas.width - totalContentWidth) / 2
+        const iconY = pillY + (pillHeight - iconSize) / 2
+        ctx.drawImage(iconImg, iconX, iconY, iconSize, iconSize)
+      }
+
       // Draw text
       ctx.save()
-      if (widget.id === 'streak' || widget.id === 'ootd' || widget.id === 'party') {
-        ctx.fillStyle = '#0f172a'
-      } else if (widget.id === 'zodiac') {
-        ctx.fillStyle = '#831843'
-      } else {
-        ctx.fillStyle = '#ffffff'
-      }
+      ctx.fillStyle = textColor
       ctx.font = `bold ${fontSize}px Inter, sans-serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(displayText, canvas.width / 2, pillY + pillHeight / 2)
+      const textX = iconImg
+        ? (canvas.width - totalContentWidth) / 2 + iconSize + gap + textWidth / 2
+        : canvas.width / 2
+      ctx.fillText(displayText, textX, pillY + pillHeight / 2)
       ctx.restore()
 
-      canvas.toBlob((b) => resolve(b || blob), 'image/jpeg', 0.88)
+      // Lossless intermediate so quality is not degraded before final WebP encoding
+      canvas.toBlob((b) => resolve(b || blob), 'image/png')
     }
     img.onerror = () => {
       URL.revokeObjectURL(url)
@@ -275,7 +336,7 @@ export function CameraPage() {
   } = useCamera()
 
   const { sendPost, sending, feed } = usePosts()
-  const { friends } = useFriends()
+  const { friends, pendingReceivedCount } = useFriends()
 
   const [caption, setCaption] = useState('')
   const [sendToAll, setSendToAll] = useState(true)
@@ -427,7 +488,7 @@ export function CameraPage() {
       if (blobToDownload && downloadUrl !== capturedImage.url) {
         URL.revokeObjectURL(downloadUrl)
       }
-      toast.success('Đã lưu ảnh vào máy! 💾')
+      toast.success('Đã lưu ảnh vào máy!')
     } catch (err) {
       console.error('Download error:', err)
       toast.error('Không thể lưu ảnh')
@@ -450,25 +511,22 @@ export function CameraPage() {
         finalBlob = await drawBadgeOnImage(finalBlob, activeWidget, customVal)
       }
 
-      const mime = capturedImage.mimeType || finalBlob?.type || 'image/jpeg'
-      const ext = mime === 'image/webp' ? 'webp' : 'jpg'
-      const file = blobToFile(finalBlob, `photo.${ext}`)
-      const compressed = await compressPostImage(file)
+      const file = blobToFile(finalBlob, 'photo.webp')
 
       const finalCaption = activeWidget.id === 'text'
         ? caption
-        : `${activeWidget.iconText} ${widgetCustomText[activeWidget.id] ?? activeWidget.defaultText}`
+        : (widgetCustomText[activeWidget.id] ?? activeWidget.defaultText)
 
       await sendPost({
-        imageFile: compressed,
+        imageFile: file,
         caption: finalCaption,
         recipientIds,
       })
 
       if (recipientIds.length > 0) {
-        toast.success('Đã gửi ảnh đến bạn bè và lưu vào Feed! 📸')
+        toast.success('Đã gửi ảnh đến bạn bè!')
       } else {
-        toast.success('Đã đăng ảnh lên Feed của bạn! 📸')
+        toast.success('Đã đăng ảnh lên Feed!')
       }
 
       setCaption('')
@@ -530,15 +588,19 @@ export function CameraPage() {
           </button>
 
           {/* Friends badge */}
-          <div className="cam-pill">
+          <button
+            onClick={() => navigate('/friends')}
+            className="cam-pill cursor-pointer hover:bg-white/15 active:scale-95 transition-all"
+            aria-label="Danh sách bạn bè"
+          >
             <Users size={15} />
             <span>{friends.length} người bạn</span>
-          </div>
+          </button>
 
           {/* User avatar */}
           <button
             onClick={() => navigate('/profile')}
-            className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/20 btn-press"
+            className="relative w-10 h-10 rounded-full ring-2 ring-white/20 btn-press cursor-pointer flex items-center justify-center"
             aria-label="Profile"
           >
             <Avatar
@@ -546,6 +608,7 @@ export function CameraPage() {
               alt={user?.user_metadata?.full_name ?? 'Me'}
               size={40}
             />
+            <FriendRequestBadge count={pendingReceivedCount} />
           </button>
         </div>
 
@@ -554,7 +617,7 @@ export function CameraPage() {
           <div className="relative w-full aspect-square max-w-[390px] rounded-[32px] overflow-hidden bg-dark-800 shadow-2xl ring-1 ring-white/10">
             {permissionDenied || cameraError ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-dark-800 animate-fade-in">
-                <AlertCircle size={40} className="text-[#E8A020] mb-3" />
+                <AlertCircle size={40} className="text-[#CCFF00] mb-3" />
                 <p className="text-white font-semibold mb-1.5 text-base">
                   {permissionDenied ? 'Đã chặn quyền máy ảnh' : 'Không thể mở Camera trực tiếp'}
                 </p>
@@ -564,7 +627,7 @@ export function CameraPage() {
                 <div className="flex flex-col gap-2.5 w-full max-w-xs">
                   <button
                     onClick={() => nativeCamInputRef.current?.click()}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-[#E8A020] hover:bg-[#d9941a] text-black font-bold text-sm flex items-center justify-center gap-2 shadow-lg btn-press"
+                    className="w-full py-3.5 px-4 rounded-2xl bg-[#CCFF00] hover:bg-[#b8e600] text-black font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg btn-press"
                   >
                     <Camera size={20} />
                     <span>Chụp bằng máy ảnh điện thoại</span>
@@ -755,14 +818,16 @@ export function CameraPage() {
                 onChange={(e) => setCaption(e.target.value)}
                 placeholder="Thêm một tin nhắn"
                 maxLength={100}
-                className="w-full text-center bg-transparent border-none outline-none text-white text-[15px] sm:text-base font-medium placeholder-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)] px-3 py-1.5 caret-[#E8A020] focus:ring-0"
+                className="w-full text-center bg-transparent border-none outline-none text-white text-[15px] sm:text-base font-medium placeholder-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)] px-3 py-1.5 caret-[#CCFF00] focus:ring-0"
               />
             ) : (
               <div
                 onClick={() => setShowWidgetSheet(true)}
                 className={`${activeWidget.sheetBg} ${activeWidget.textColor} px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 max-w-[90%] cursor-pointer active:scale-95 transition-transform`}
               >
-                <span className="text-base leading-none select-none">{activeWidget.iconText}</span>
+                {activeWidget.Icon && (
+                  <activeWidget.Icon size={16} className="flex-shrink-0" strokeWidth={2.4} />
+                )}
                 <input
                   type="text"
                   value={widgetCustomText[activeWidget.id] ?? activeWidget.defaultText}
@@ -838,7 +903,7 @@ export function CameraPage() {
         >
           <div className="w-11 h-11 rounded-full border-2 border-white/80 flex items-center justify-center relative">
             <span className="text-white font-bold text-base leading-none select-none">Aa</span>
-            <span className="absolute -top-1 -right-1 text-white text-[12px] leading-none select-none font-bold">✦</span>
+            <Sparkles size={11} className="absolute -top-1 -right-1 text-white" strokeWidth={2.5} />
           </div>
         </button>
       </div>
@@ -854,19 +919,19 @@ export function CameraPage() {
             <div
               className={`w-13 h-13 rounded-full flex items-center justify-center transition-all ${
                 sendToAll
-                  ? 'ring-2 ring-[#E8A020] ring-offset-2 ring-offset-black bg-[#1c1c1e]'
+                  ? 'ring-2 ring-[#CCFF00] ring-offset-2 ring-offset-black bg-[#1c1c1e]'
                   : 'ring-1 ring-white/20 bg-[#1c1c1e] opacity-70 group-hover:opacity-100'
               }`}
             >
               <Users
                 size={22}
-                className={sendToAll ? 'text-[#E8A020]' : 'text-white/80'}
+                className={sendToAll ? 'text-[#CCFF00]' : 'text-white/80'}
                 strokeWidth={2.2}
               />
             </div>
             <span
               className={`text-xs font-semibold tracking-tight transition-colors ${
-                sendToAll ? 'text-[#E8A020]' : 'text-white/60'
+                sendToAll ? 'text-[#CCFF00]' : 'text-white/60'
               }`}
             >
               Tất cả
@@ -889,7 +954,7 @@ export function CameraPage() {
                 <div
                   className={`w-13 h-13 rounded-full overflow-hidden transition-all flex items-center justify-center bg-dark-700 ${
                     isSelected
-                      ? 'ring-2 ring-[#E8A020] ring-offset-2 ring-offset-black'
+                      ? 'ring-2 ring-[#CCFF00] ring-offset-2 ring-offset-black'
                       : 'ring-1 ring-white/20 opacity-80 group-hover:opacity-100'
                   }`}
                 >
@@ -901,7 +966,7 @@ export function CameraPage() {
                 </div>
                 <span
                   className={`text-xs font-semibold tracking-tight max-w-[64px] truncate transition-colors ${
-                    isSelected ? 'text-[#E8A020]' : 'text-white/60'
+                    isSelected ? 'text-[#CCFF00]' : 'text-white/60'
                   }`}
                 >
                   {name}
@@ -976,7 +1041,7 @@ export function CameraPage() {
                           : 'border-white/5 hover:border-white/20 opacity-90 hover:opacity-100'
                       }`}
                     >
-                      <span className="text-base leading-none">{w.iconText}</span>
+                      {w.Icon && <w.Icon size={16} className="flex-shrink-0" strokeWidth={2.2} />}
                       <span>{w.id === 'text' ? 'Văn bản' : w.pillText}</span>
                     </button>
                   )
@@ -1004,7 +1069,7 @@ export function CameraPage() {
                           : 'border-white/5 hover:border-white/20 opacity-90 hover:opacity-100'
                       }`}
                     >
-                      <span className="text-base leading-none">{w.iconText}</span>
+                      {w.Icon && <w.Icon size={16} className="flex-shrink-0" strokeWidth={2.2} />}
                       <span>{w.pillText}</span>
                     </button>
                   )

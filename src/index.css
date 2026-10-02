@@ -19,7 +19,7 @@
   --color-accent-rose: #f43f5e;
   --color-accent-orange: #f97316;
   --color-accent-emerald: #10b981;
-  --color-shutter-ring: #E8A020;
+  --color-shutter-ring: #CCFF00;
 
   --color-glass-white: rgba(255, 255, 255, 0.06);
   --color-glass-border: rgba(255, 255, 255, 0.1);
@@ -176,6 +176,15 @@ html, body, #root {
   animation: spin 1s linear infinite;
 }
 
+@keyframes scale-in {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
 .skeleton {
   background: linear-gradient(90deg, var(--color-dark-700) 25%, var(--color-dark-600) 50%, var(--color-dark-700) 75%);
   background-size: 200% 100%;
@@ -210,7 +219,7 @@ input:-webkit-autofill:focus {
 
 /* ======= Camera UI Components ======= */
 
-/* Shutter ring — BeReal-style amber border */
+/* Shutter ring — BeReal-style Cyber Lime border */
 .cam-shutter-ring {
   width: 76px;
   height: 76px;
